@@ -1,2 +1,2 @@
-# fsize
-A utility for measuring file or directory size with human readable output.
+# fsize (or file size)
+Is a software tool designed to calculate and display the storage space occupied by files or folders on a computer system. This type of utility converts technical byte measurements into easily understandable formats such as kilobytes, megabytes, gigabytes, or terabytes, making it simple for users to quickly grasp how much disk space is being consumed. By presenting file and directory sizes in a clear, accessible manner rather than raw numerical values.
