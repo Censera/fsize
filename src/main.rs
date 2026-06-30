@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::process;
 
-use fsize::{compute_total_size, format_mtime, format_size, Unit};
+use fsize::{compute_total_size, format_mtime, format_size, Color, Unit};
 
 #[derive(Parser)]
 #[command(
@@ -37,7 +37,12 @@ fn main() {
 
     let unit = args.in_unit.as_deref().and_then(Unit::from_str);
     if args.in_unit.is_some() && unit.is_none() {
-        eprintln!("[Error] invalid unit `{}`", args.in_unit.unwrap());
+        eprintln!(
+            "{}[ERROR]{} invalid unit `{}`",
+            Color::RED,
+            Color::RESET,
+            args.in_unit.unwrap()
+        );
         process::exit(1);
     }
 
@@ -77,7 +82,9 @@ fn main() {
                         }
                         Err(e) => {
                             eprintln!(
-                                "[Warning] cannot read metadata for `{}`: {}",
+                                "{}[WARNING]{} cannot read metadata for `{}`: {}",
+                                Color::YELLOW,
+                                Color::RESET,
                                 path.display(),
                                 e
                             );
@@ -93,7 +100,7 @@ fn main() {
                 }
             }
             Err(e) => {
-                eprintln!("[Error] {}", e);
+                eprintln!("{}[ERROR]{} {}", Color::RED, Color::RESET, e);
                 exit_code = 1;
             }
         }

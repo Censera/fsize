@@ -2,7 +2,6 @@ use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 #[derive(Debug, thiserror::Error)]
-
 pub enum FsizeError {
     #[error("I/O error for `{path}`: {source}")]
     Io { path: PathBuf, source: io::Error },
@@ -12,6 +11,14 @@ pub enum FsizeError {
 
     #[error("Path does not exist: `{0}`")]
     NotFound(PathBuf),
+}
+
+pub struct Color;
+
+impl Color {
+    pub const RED: &'static str = "\x1b[1;31m";
+    pub const YELLOW: &'static str = "\x1b[33m";
+    pub const RESET: &'static str = "\x1b[0m";
 }
 
 pub fn compute_total_size(path: &Path) -> Result<u64, FsizeError> {
@@ -42,7 +49,9 @@ pub fn compute_total_size(path: &Path) -> Result<u64, FsizeError> {
                                     }
                                     Err(e) => {
                                         eprintln!(
-                                            "[Warning] cannot access `{}`: {}",
+                                            "{}[WARNING]{} cannot access `{}`: {}",
+                                            Color::YELLOW,
+                                            Color::RESET,
                                             p.display(),
                                             e
                                         );
@@ -50,7 +59,12 @@ pub fn compute_total_size(path: &Path) -> Result<u64, FsizeError> {
                                 }
                             }
                             Err(e) => {
-                                eprintln!("[Warning] read_dir entry error: {}", e);
+                                eprintln!(
+                                    "{}[WARNING]{} read_dir entry error: {}",
+                                    Color::YELLOW,
+                                    Color::RESET,
+                                    e
+                                );
                             }
                         }
                     }
