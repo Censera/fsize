@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+cargo build --release
+cp target/release/fsize fsize-linux
+
+rustup target add x86_64-pc-windows-gnu 2>/dev/null
+cargo build --release --target x86_64-pc-windows-gnu
+cp target/x86_64-pc-windows-gnu/release/fsize.exe fsize-windows.exe
+
+echo "Binaries ready: fsize-linux, fsize-windows.exe"
