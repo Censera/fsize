@@ -1,14 +1,17 @@
+// src/lib.rs
+
+use chrono::{DateTime, Local};
+use rayon::prelude::*;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
+use walkdir::WalkDir;
 
 #[derive(Debug, thiserror::Error)]
 pub enum FsizeError {
     #[error("I/O error for `{path}`: {source}")]
     Io { path: PathBuf, source: io::Error },
-
     #[error("Invalid unit specification: `{0}`")]
     InvalidUnit(String),
-
     #[error("Path does not exist: `{0}`")]
     NotFound(PathBuf),
 }
@@ -28,55 +31,43 @@ pub fn compute_total_size(path: &Path) -> Result<u64, FsizeError> {
     })?;
 
     if meta.file_type().is_dir() {
-        let mut total = 0;
-        let mut stack = Vec::new();
-        stack.push(path.to_owned());
-
-        while let Some(dir) = stack.pop() {
-            match fs::read_dir(&dir) {
-                Ok(entries) => {
-                    for entry in entries {
-                        match entry {
-                            Ok(e) => {
-                                let p = e.path();
-                                match fs::symlink_metadata(&p) {
-                                    Ok(m) => {
-                                        if m.file_type().is_dir() {
-                                            stack.push(p);
-                                        } else {
-                                            total += m.len();
-                                        }
-                                    }
-                                    Err(e) => {
-                                        eprintln!(
-                                            "{}[WARNING]{} cannot access `{}`: {}",
-                                            Color::YELLOW,
-                                            Color::RESET,
-                                            p.display(),
-                                            e
-                                        );
-                                    }
-                                }
-                            }
-                            Err(e) => {
-                                eprintln!(
-                                    "{}[WARNING]{} read_dir entry error: {}",
-                                    Color::YELLOW,
-                                    Color::RESET,
-                                    e
-                                );
-                            }
+        let total = WalkDir::new(path)
+            .follow_links(false)
+            .into_iter()
+            .par_bridge()
+            .filter_map(|entry| match entry {
+                Ok(e) => match e.metadata() {
+                    Ok(m) => {
+                        if m.is_dir() {
+                            Some(0)
+                        } else {
+                            Some(m.len())
                         }
                     }
-                }
+                    Err(e) => {
+                        let p = e.path()?;
+                        eprintln!(
+                            "{}[WARNING]{} cannot access `{}`: {}",
+                            Color::YELLOW,
+                            Color::RESET,
+                            p.display(),
+                            e
+                        );
+                        None
+                    }
+                },
                 Err(e) => {
-                    return Err(FsizeError::Io {
-                        path: dir,
-                        source: e,
-                    });
+                    eprintln!(
+                        "{}[WARNING]{} walkdir error: {}",
+                        Color::YELLOW,
+                        Color::RESET,
+                        e
+                    );
+                    None
                 }
-            }
-        }
+            })
+            .sum::<u64>();
+
         Ok(total)
     } else {
         Ok(meta.len())
@@ -94,7 +85,6 @@ pub enum Unit {
     MiB,
     GiB,
     TiB,
-    //PB, PiB, etc. // Maybe in the future
 }
 
 impl Unit {
@@ -112,6 +102,7 @@ impl Unit {
             _ => None,
         }
     }
+
     const fn divisor(self) -> u64 {
         match self {
             Unit::B => 1,
@@ -180,15 +171,12 @@ pub fn format_size(bytes: u64, unit: Option<Unit>, binary: bool) -> String {
 }
 
 fn format_pre(num: f64) -> String {
-    let formatted = format!("{:.1$}", num, 3); // 3 looks nice
-
+    let formatted = format!("{:.1$}", num, 3);
     formatted
         .trim_end_matches('0')
         .trim_end_matches('.')
         .to_string()
 }
-
-use chrono::{DateTime, Local};
 
 pub fn format_mtime(time: std::time::SystemTime) -> String {
     let dt: DateTime<Local> = time.into();

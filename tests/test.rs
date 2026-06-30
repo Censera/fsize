@@ -5,7 +5,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_format_size_decimal() {
+    fn decimal() {
         assert_eq!(format_size(1024, None, false), "1.024 KB");
         assert_eq!(format_size(2048, None, false), "2.048 KB");
         assert_eq!(format_size(4096, None, false), "4.096 KB");
@@ -20,7 +20,7 @@ mod tests {
     }
 
     #[test]
-    fn test_format_size_binary() {
+    fn binary() {
         assert_eq!(format_size(1024, None, true), "1 KiB");
         assert_eq!(format_size(2048, None, true), "2 KiB");
         assert_eq!(format_size(4096, None, true), "4 KiB");
