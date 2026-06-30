@@ -175,11 +175,7 @@ pub fn format_size(bytes: u64, unit: Option<Unit>, binary: bool) -> String {
         format!("{} {}", bytes, unit.name())
     } else {
         let value = bytes as f64 / divisor as f64;
-        if value.fract().abs() < 0.005 {
-            format!("{} {}", format_pre(value), unit.name())
-        } else {
-            format!("{} {}", format_pre(value), unit.name())
-        }
+        format!("{} {}", format_pre(value), unit.name())
     }
 }
 
