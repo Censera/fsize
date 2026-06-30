@@ -5,6 +5,7 @@ in a human‑friendly format.
 
 ## Usage
 
+```
 fsize [OPTIONS] <PATH>...
 
 Options:
@@ -23,7 +24,10 @@ fsize -i file.txt       → 24 KB - Jun 24 17:32
 fsize -i /some/dir      → 1.2 GB d Jun 24 17:32
 
 Aliases: `file`, `filesize`, `fs` (symlink the binary).
+```
 
 ## Installation
 
+```
 cargo install --path .
+```

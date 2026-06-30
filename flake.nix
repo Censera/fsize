@@ -32,20 +32,13 @@
         buildInputs = [ ];
     };
 
+
     linuxPackage = pkgs.rustPlatform.buildRustPackage (commonArgs // {
         meta.mainProgram = "fsize";
     });
 
     windowsPackage = pkgs.pkgsCross.mingwW64.rustPlatform.buildRustPackage (commonArgs // {
-        nativeBuildInputs = commonArgs.nativeBuildInputs ++ [
-            pkgs.pkgsCross.mingwW64.windows.pthreads
-        ];
-        buildInputs = commonArgs.buildInputs ++ [
-            pkgs.pkgsCross.mingwW64.windows.pthreads
-        ];
-
         cargoBuildFlags = [ "--target" "x86_64-pc-windows-gnu" ];
-
         CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER = "${pkgs.pkgsCross.mingwW64.stdenv.cc}/bin/${pkgs.pkgsCross.mingwW64.stdenv.cc.targetPrefix}cc";
     });
 
@@ -59,7 +52,6 @@
         devShells.default = pkgs.mkShell {
             buildInputs = [
                 rustToolchain
-                pkgs.pkgsCross.mingwW64.windows.pthreads
                 pkgs.pkgsCross.mingwW64.stdenv.cc
             ];
             shellHook = ''

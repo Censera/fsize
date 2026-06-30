@@ -42,7 +42,7 @@ pub fn compute_total_size(path: &Path) -> Result<u64, FsizeError> {
                                     }
                                     Err(e) => {
                                         eprintln!(
-                                            "Warning: cannot access `{}`: {}",
+                                            "[Warning] cannot access `{}`: {}",
                                             p.display(),
                                             e
                                         );
@@ -50,7 +50,7 @@ pub fn compute_total_size(path: &Path) -> Result<u64, FsizeError> {
                                 }
                             }
                             Err(e) => {
-                                eprintln!("Warning: read_dir entry error: {}", e);
+                                eprintln!("[Warning] read_dir entry error: {}", e);
                             }
                         }
                     }
@@ -85,20 +85,19 @@ pub enum Unit {
 
 impl Unit {
     pub fn from_str(s: &str) -> Option<Self> {
-        match s.trim().to_uppercase().as_str() {
-            "B" => Some(Unit::B),
-            "KB" => Some(Unit::KB),
-            "MB" => Some(Unit::MB),
-            "GB" => Some(Unit::GB),
-            "TB" => Some(Unit::TB),
-            "KIB" => Some(Unit::KiB),
-            "MIB" => Some(Unit::MiB),
-            "GIB" => Some(Unit::GiB),
-            "TIB" => Some(Unit::TiB),
+        match s.trim().to_lowercase().as_str() {
+            "b" => Some(Unit::B),
+            "kb" => Some(Unit::KB),
+            "mb" => Some(Unit::MB),
+            "gb" => Some(Unit::GB),
+            "tb" => Some(Unit::TB),
+            "kib" => Some(Unit::KiB),
+            "mib" => Some(Unit::MiB),
+            "gib" => Some(Unit::GiB),
+            "tib" => Some(Unit::TiB),
             _ => None,
         }
     }
-
     const fn divisor(self) -> u64 {
         match self {
             Unit::B => 1,
@@ -158,16 +157,25 @@ pub fn format_size(bytes: u64, unit: Option<Unit>, binary: bool) -> String {
     });
 
     let divisor = unit.divisor();
-    if divisor == 1 || bytes < divisor {
+    if divisor == 1 {
         format!("{} {}", bytes, unit.name())
     } else {
         let value = bytes as f64 / divisor as f64;
         if value.fract().abs() < 0.005 {
-            format!("{} {}", value.round() as u64, unit.name())
+            format!("{} {}", format_pre(value), unit.name())
         } else {
-            format!("{:.1} {}", value, unit.name())
+            format!("{} {}", format_pre(value), unit.name())
         }
     }
+}
+
+fn format_pre(num: f64) -> String {
+    let formatted = format!("{:.1$}", num, 3); // 3 looks nice
+
+    formatted
+        .trim_end_matches('0')
+        .trim_end_matches('.')
+        .to_string()
 }
 
 use chrono::{DateTime, Local};
