@@ -12,9 +12,9 @@ fsize [OPTIONS] <PATH>...
 Options:
 
 ```ts
--d, --binary        Use binary (IEC) units (KiB, MiB, etc.)
+-b, --binary        Use binary (IEC) units (KiB, MiB, etc.)
 -r, --raw           Output raw byte count
--b, --byte          Alias for --raw
+-o, --byte          Alias for --raw
 -u, --unit <UNIT>   Force output in a specific unit (e.g., MiB, KB)
 -i, --info          Show extra info: type indicator (d/l/f) and modification time
 ```
